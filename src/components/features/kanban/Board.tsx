@@ -24,6 +24,7 @@ import { updateContentStatus, assignTalentToContent } from '@/actions/content-ac
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Plus } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface BoardProps {
     initialTasks: any[]
@@ -43,6 +44,7 @@ export function Board({ initialTasks, talents }: BoardProps) {
     const [activeId, setActiveId] = useState<string | null>(null)
     const [activeType, setActiveType] = useState<'Task' | 'Talent' | null>(null)
     const [activeItem, setActiveItem] = useState<any>(null)
+    const [mobileTab, setMobileTab] = useState('Idea')
 
     // Modal State
     const [modalOpen, setModalOpen] = useState(false)
@@ -75,9 +77,6 @@ export function Board({ initialTasks, talents }: BoardProps) {
     }
 
     function handleSaveTask(updatedTask: any) {
-        // Optimistic update handled by Next.js revalidatePath usually, 
-        // but we can update local state for instant feedback if we wanted.
-        // For now, we rely on the server action's revalidate.
         setModalOpen(false)
     }
 
@@ -95,7 +94,7 @@ export function Board({ initialTasks, talents }: BoardProps) {
     }
 
     const handleDragOver = (event: DragOverEvent) => {
-        // Optional sorting logic can go here
+        // Optional sorting logic
     }
 
     const handleDragEnd = async (event: DragEndEvent) => {
@@ -154,7 +153,6 @@ export function Board({ initialTasks, talents }: BoardProps) {
             }
 
             if (newStatus && newStatus !== active.data.current.task.status) {
-                // Optimistic Local Update
                 setTasks((prev) =>
                     prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t)
                 )
@@ -174,74 +172,135 @@ export function Board({ initialTasks, talents }: BoardProps) {
 
     return (
         <div className="flex flex-col h-full">
-            {/* Header Integrated into Board Area */}
-            <header className="mb-8 flex justify-between items-center px-2">
+            {/* Header */}
+            <header className="mb-6 md:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                         Welcome back, Krisnanda! ✨
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium">
-                        Here's what's happening with your content today.
+                    <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
+                        Here&apos;s what&apos;s happening with your content today.
                     </p>
                 </div>
                 <button
                     onClick={handleCreateNew}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95 text-sm md:text-base shrink-0"
                 >
                     <Plus size={18} />
                     <span>New Idea</span>
                 </button>
             </header>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCorners}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-            >
-                <div className="flex h-[calc(100vh-200px)] gap-6 overflow-x-auto pb-4 px-2">
-                    {/* Kanban Board Area */}
-                    <div className="flex gap-6 flex-1 min-w-max">
-                        {COLUMNS.map((col) => (
-                            <Column
+            {/* ===== MOBILE TABBED VIEW (< md) ===== */}
+            <div className="md:hidden flex flex-col flex-1 w-full max-w-[100vw] overflow-hidden">
+                {/* Tab Pills */}
+                <div className="flex gap-2 overflow-x-auto px-4 pb-4 no-scrollbar w-full">
+                    {COLUMNS.map((col) => {
+                        const count = getTasksByStatus(col.id).length
+                        const isActive = mobileTab === col.id
+                        return (
+                            <button
                                 key={col.id}
-                                id={col.id}
-                                title={col.title}
-                                tasks={getTasksByStatus(col.id)}
-                                talents={talents}
-                                onEditTask={handleEditTask}
-                            />
-                        ))}
-                    </div>
-
-
+                                onClick={() => setMobileTab(col.id)}
+                                className={cn(
+                                    "relative shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200",
+                                    isActive
+                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
+                                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                )}
+                            >
+                                {col.title}
+                                {count > 0 && (
+                                    <span className={cn(
+                                        "ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold",
+                                        isActive ? "bg-white/20 text-white" : "bg-slate-200 text-slate-500"
+                                    )}>
+                                        {count}
+                                    </span>
+                                )}
+                            </button>
+                        )
+                    })}
                 </div>
 
-                <DragOverlay dropAnimation={{
-                    sideEffects: defaultDropAnimationSideEffects({
-                        styles: {
-                            active: {
-                                opacity: '0.5',
+                {/* Active Column Cards */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden w-full">
+                    <motion.div
+                        key={mobileTab}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex flex-col items-center justify-start w-full px-4 gap-4 pb-4"
+                    >
+                        {getTasksByStatus(mobileTab).length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+                                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                                    <span className="text-2xl">📋</span>
+                                </div>
+                                <p className="text-slate-400 text-sm font-medium">
+                                    No items in {mobileTab}
+                                </p>
+                            </div>
+                        ) : (
+                            getTasksByStatus(mobileTab).map(task => (
+                                <div key={task.id} onClick={() => handleEditTask(task)} className="cursor-pointer w-[calc(100vw-32px)] max-w-[400px] box-border">
+                                    <KanbanCard task={task} />
+                                </div>
+                            ))
+                        )}
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* ===== DESKTOP DND COLUMNS (md+) ===== */}
+            <div className="hidden md:block">
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCorners}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div className="flex h-[calc(100vh-200px)] gap-6 overflow-x-auto pb-4 px-2">
+                        <div className="flex gap-6 flex-1 min-w-max">
+                            {COLUMNS.map((col) => (
+                                <Column
+                                    key={col.id}
+                                    id={col.id}
+                                    title={col.title}
+                                    tasks={getTasksByStatus(col.id)}
+                                    talents={talents}
+                                    onEditTask={handleEditTask}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <DragOverlay dropAnimation={{
+                        sideEffects: defaultDropAnimationSideEffects({
+                            styles: {
+                                active: {
+                                    opacity: '0.5',
+                                },
                             },
-                        },
-                    }),
-                }}>
-                    {activeId && activeType === 'Task' ? (
-                        <div className="w-[280px] cursor-grabbing rotate-3 scale-105">
-                            <KanbanCard task={activeItem} />
-                        </div>
-                    ) : activeId && activeType === 'Talent' ? (
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-slate-200 shadow-xl cursor-grabbing scale-105 rotate-3 w-max">
-                            <Avatar className="h-8 w-8 ring-2 ring-white">
-                                <AvatarImage src={activeItem.avatar_url} />
-                                <AvatarFallback>{activeItem.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm font-semibold text-slate-900">{activeItem.name}</span>
-                        </div>
-                    ) : null}
-                </DragOverlay>
-            </DndContext>
+                        }),
+                    }}>
+                        {activeId && activeType === 'Task' ? (
+                            <div className="w-[280px] cursor-grabbing rotate-3 scale-105">
+                                <KanbanCard task={activeItem} />
+                            </div>
+                        ) : activeId && activeType === 'Talent' ? (
+                            <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-slate-200 shadow-xl cursor-grabbing scale-105 rotate-3 w-max">
+                                <Avatar className="h-8 w-8 ring-2 ring-white">
+                                    <AvatarImage src={activeItem.avatar_url} />
+                                    <AvatarFallback>{activeItem.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-semibold text-slate-900">{activeItem.name}</span>
+                            </div>
+                        ) : null}
+                    </DragOverlay>
+                </DndContext>
+            </div>
 
             <ContentModal
                 task={selectedTask}

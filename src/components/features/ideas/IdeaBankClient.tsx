@@ -103,18 +103,18 @@ export function IdeaBankClient({ initialIdeas }: IdeaBankClientProps) {
     return (
         <>
             {/* Header */}
-            <header className="mb-10 flex justify-between items-center px-2">
+            <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                         Idea Bank 💡
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium">
+                    <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
                         Brainstorm and capture your next viral hit.
                     </p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95 text-sm md:text-base shrink-0"
                 >
                     <Plus size={18} />
                     <span>Add New Idea</span>
@@ -180,7 +180,7 @@ export function IdeaBankClient({ initialIdeas }: IdeaBankClientProps) {
 
             {/* Add / Edit Idea Modal */}
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                <DialogContent className="sm:max-w-[520px] bg-white text-slate-900 rounded-[32px] border-none shadow-2xl">
+                <DialogContent className="max-w-[95vw] sm:max-w-[520px] bg-white text-slate-900 rounded-2xl sm:rounded-[32px] border-none shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-bold flex items-center gap-3">
                             <div className="p-2 bg-blue-50 rounded-xl">

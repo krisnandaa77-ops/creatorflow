@@ -128,8 +128,8 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
         const offset = circumference - (pct / 100) * circumference
         return (
             <div className="flex flex-col items-center">
-                <div className="relative w-20 h-20">
-                    <svg className="w-full h-full transform -rotate-90">
+                <div className="relative w-16 h-16 md:w-20 md:h-20">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
                         <circle cx="40" cy="40" r="36" strokeWidth="6" fill="transparent" className="text-slate-100" stroke="currentColor" />
                         <motion.circle
                             initial={{ strokeDashoffset: circumference }}
@@ -141,10 +141,10 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
                         />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-bold text-slate-800">{pct}%</span>
+                        <span className="text-xs md:text-sm font-bold text-slate-800">{pct}%</span>
                     </div>
                 </div>
-                <span className="text-xs font-semibold text-slate-500 mt-2">{label}</span>
+                <span className="text-[10px] md:text-xs font-semibold text-slate-500 mt-1 md:mt-2">{label}</span>
             </div>
         )
     }
@@ -157,16 +157,16 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
         <>
             {/* Header with date */}
             <header className="mb-8 px-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                             Daily Focus ⚡
                         </h1>
-                        <p className="text-slate-500 mt-1 font-medium">
+                        <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
                             {dateString}
                         </p>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 md:gap-6 flex-wrap">
                         <CircleProgress pct={shootingPct} color="#3b82f6" label="Shooting" />
                         <CircleProgress pct={uploadPct} color="#10b981" label="Uploads" />
                         <CircleProgress pct={todoPct} color="#f59e0b" label="Tasks" />
@@ -193,7 +193,7 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
             {/* 3-Column Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-2">
                 {/* Column 1: Shooting Today */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="bg-white rounded-2xl md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-blue-50 rounded-2xl">
@@ -232,7 +232,7 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
                 </div>
 
                 {/* Column 2: Upload Today */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="bg-white rounded-2xl md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-emerald-50 rounded-2xl">
@@ -271,7 +271,7 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
                 </div>
 
                 {/* Column 3: General Tasks */}
-                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="bg-white rounded-2xl md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-amber-50 rounded-2xl">

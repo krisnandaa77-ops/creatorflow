@@ -120,7 +120,26 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
   }
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

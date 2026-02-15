@@ -53,19 +53,19 @@ export default function TalentsPage() {
     ]
 
     return (
-        <div className="flex min-h-screen bg-white text-slate-900">
+        <div className="flex min-h-screen bg-white text-slate-900 overflow-x-hidden w-full">
             <Sidebar />
-            <main className="flex-1 ml-72 p-8">
-                <header className="mb-10 flex justify-between items-center px-2">
+            <main className="flex-1 lg:ml-72 p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">
+                <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                             Talents & Team 👥
                         </h1>
-                        <p className="text-slate-500 mt-1 font-medium">
+                        <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
                             Manage your creative team and collaborators.
                         </p>
                     </div>
-                    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95 text-sm md:text-base shrink-0">
                         <Plus size={18} />
                         <span>Add Talent</span>
                     </button>

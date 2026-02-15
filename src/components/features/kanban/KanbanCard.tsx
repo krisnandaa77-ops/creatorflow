@@ -91,7 +91,7 @@ export function KanbanCard({ task, talents, onEdit, overlay }: KanbanCardProps) 
                     <Card
                         onClick={handleClick}
                         className={cn(
-                            "cursor-grab active:cursor-grabbing hover:shadow-[0_20px_50px_-12px_rgba(79,70,229,0.1)] transition-all duration-300 rounded-[32px] border-zinc-100 shadow-sm bg-white overflow-hidden",
+                            "cursor-grab active:cursor-grabbing hover:shadow-[0_20px_50px_-12px_rgba(79,70,229,0.1)] transition-all duration-300 rounded-2xl md:rounded-[32px] border-zinc-100 shadow-sm bg-white overflow-hidden w-full max-w-full box-border",
                             isOver && "ring-2 ring-indigo-500 bg-indigo-50/50",
                             isTodayAction && "ring-2 ring-indigo-500/10 shadow-[0_0_25px_rgba(99,102,241,0.2)] border-indigo-100"
                         )}

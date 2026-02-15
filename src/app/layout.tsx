@@ -18,12 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-hidden">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700;0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${jakarta.className} antialiased bg-[#f6f6f8] dark:bg-[#111521] text-slate-900 dark:text-white`}>
+      <body className={`${jakarta.className} antialiased bg-[#f6f6f8] dark:bg-[#111521] text-slate-900 dark:text-white overflow-x-hidden w-full max-w-[100vw]`}>
         {children}
       </body>
     </html>

@@ -99,21 +99,21 @@ export function CalendarClient({ contents }: CalendarClientProps) {
             {/* Header */}
             <header className="mb-8 flex justify-between items-center px-2">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                         Calendar 📅
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium">
+                    <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
                         Your filming and upload schedule, synced from content.
                     </p>
                 </div>
             </header>
 
             {/* Calendar Card */}
-            <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+            <div className="bg-white rounded-2xl md:rounded-[32px] p-4 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
                 {/* Month Navigation */}
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold text-slate-900">{monthName} {year}</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+                    <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900">{monthName} {year}</h2>
                         <div className="flex gap-1">
                             <button onClick={prevMonth} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
                                 <ChevronLeft size={20} />
@@ -126,7 +126,7 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                             Today
                         </button>
                     </div>
-                    <div className="flex gap-6 text-sm font-medium text-slate-500">
+                    <div className="flex gap-4 md:gap-6 text-xs md:text-sm font-medium text-slate-500">
                         <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50" />
                             <span>🎬 Shooting ({totalShooting})</span>
@@ -139,20 +139,20 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                 </div>
 
                 {/* Days Header */}
-                <div className="grid grid-cols-7 mb-4">
+                <div className="grid grid-cols-7 mb-2 md:mb-4">
                     {days.map(day => (
-                        <div key={day} className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider py-2">
+                        <div key={day} className="text-center text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-wider py-1 md:py-2">
                             {day}
                         </div>
                     ))}
                 </div>
 
                 {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1 md:gap-2">
                     {/* Previous month padding */}
                     {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                        <div key={`prev-${i}`} className="min-h-[120px] bg-slate-50/30 border border-slate-50 rounded-[20px] p-3">
-                            <span className="text-sm font-medium text-slate-200">
+                        <div key={`prev-${i}`} className="min-h-[60px] md:min-h-[120px] bg-slate-50/30 border border-slate-50 rounded-xl md:rounded-[20px] p-1.5 md:p-3">
+                            <span className="text-[10px] md:text-sm font-medium text-slate-200">
                                 {daysInPrevMonth - firstDayOfMonth + 1 + i}
                             </span>
                         </div>
@@ -169,14 +169,14 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                             <div
                                 key={day}
                                 className={cn(
-                                    "min-h-[120px] border p-3 rounded-[20px] transition-all hover:shadow-md group relative",
+                                    "min-h-[60px] md:min-h-[120px] border p-1.5 md:p-3 rounded-xl md:rounded-[20px] transition-all hover:shadow-md group relative",
                                     isToday
                                         ? "bg-blue-50/50 border-blue-200 shadow-sm"
                                         : "bg-white border-slate-100 hover:border-slate-200"
                                 )}
                             >
                                 <span className={cn(
-                                    "text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full mb-2",
+                                    "text-[10px] md:text-sm font-semibold w-5 h-5 md:w-7 md:h-7 flex items-center justify-center rounded-full mb-1 md:mb-2",
                                     isToday
                                         ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
                                         : "text-slate-400 group-hover:text-slate-600"
@@ -184,7 +184,7 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                                     {day}
                                 </span>
 
-                                <div className="space-y-1.5">
+                                <div className="space-y-1 md:space-y-1.5 hidden md:block">
                                     {dayEvents.slice(0, 3).map(event => (
                                         <div
                                             key={event.id}
@@ -210,6 +210,23 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                                         </div>
                                     )}
                                 </div>
+                                {/* Mobile dot indicators */}
+                                {dayEvents.length > 0 && (
+                                    <div className="flex gap-0.5 md:hidden mt-0.5">
+                                        {dayEvents.slice(0, 3).map(event => (
+                                            <span
+                                                key={event.id}
+                                                className={cn(
+                                                    "w-1.5 h-1.5 rounded-full",
+                                                    event.type === 'shooting' ? "bg-blue-500" : "bg-emerald-500"
+                                                )}
+                                            />
+                                        ))}
+                                        {dayEvents.length > 3 && (
+                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )
                     })}

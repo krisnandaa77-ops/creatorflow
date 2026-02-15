@@ -37,7 +37,7 @@ export function IdeaCard({ idea, onClick, index = 0 }: IdeaCardProps) {
             transition={{ delay: index * 0.05, type: 'spring', stiffness: 200 }}
             whileHover={{ y: -6, scale: 1.02 }}
             onClick={onClick}
-            className="group relative bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 cursor-pointer transition-all duration-300"
+            className="group relative bg-white rounded-2xl md:rounded-[32px] p-4 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 cursor-pointer transition-all duration-300 w-full max-w-full box-border"
         >
             {/* Top Row: Icon + Edit */}
             <div className="flex justify-between items-start mb-4">

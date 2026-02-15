@@ -147,178 +147,187 @@ export function ContentModal({ task, talents, open, onOpenChange, onSave }: Cont
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] bg-white text-slate-900 rounded-[32px] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">
-                        {task ? 'Edit Content' : 'New Idea'}
-                    </DialogTitle>
-                </DialogHeader>
+            <DialogContent className="max-w-[100vw] sm:max-w-[600px] w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-white text-slate-900 rounded-none sm:rounded-[32px] border-none shadow-2xl overflow-hidden flex flex-col p-0">
+                <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-6">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl sm:text-2xl font-bold">
+                            {task ? 'Edit Content' : 'New Idea'}
+                        </DialogTitle>
+                    </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-                    {/* Title */}
-                    <div className="space-y-2">
-                        <Label htmlFor="title" className="text-slate-700 font-semibold">Title</Label>
-                        <Input
-                            id="title"
-                            required
-                            placeholder="e.g. Day in the life..."
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="rounded-xl border-slate-200 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Platform + Status */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                        {/* Title */}
                         <div className="space-y-2">
-                            <Label className="text-slate-700 font-semibold">Platform</Label>
-                            <Select value={platform} onValueChange={setPlatform}>
-                                <SelectTrigger className="rounded-xl border-slate-200">
-                                    <SelectValue placeholder="Select platform" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white rounded-xl">
-                                    <SelectItem value="TikTok">TikTok</SelectItem>
-                                    <SelectItem value="Instagram">Instagram</SelectItem>
-                                    <SelectItem value="YouTube">YouTube</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="title" className="text-slate-700 font-semibold">Title</Label>
+                            <Input
+                                id="title"
+                                required
+                                placeholder="e.g. Day in the life..."
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="rounded-xl border-slate-200 focus:ring-blue-500"
+                            />
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-slate-700 font-semibold">Status</Label>
-                            <Select value={status} onValueChange={setStatus}>
-                                <SelectTrigger className="rounded-xl border-slate-200">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white rounded-xl">
-                                    <SelectItem value="Idea">Idea</SelectItem>
-                                    <SelectItem value="To-Do">To-Do</SelectItem>
-                                    <SelectItem value="Filming">Filming</SelectItem>
-                                    <SelectItem value="Editing">Editing</SelectItem>
-                                    <SelectItem value="Done">Done</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <Label htmlFor="description" className="text-slate-700 font-semibold">Description</Label>
-                        <Textarea
-                            id="description"
-                            placeholder="Short description of this content idea..."
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="rounded-xl border-slate-200 min-h-[80px] focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Script / Notes */}
-                    <div className="space-y-2">
-                        <Label htmlFor="script" className="text-slate-700 font-semibold">Script / Notes</Label>
-                        <Textarea
-                            id="script"
-                            placeholder="Key hooks, visual ideas, talking points..."
-                            value={script}
-                            onChange={(e) => setScript(e.target.value)}
-                            className="rounded-xl border-slate-200 min-h-[80px] focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Reference Link */}
-                    <div className="space-y-2">
-                        <Label htmlFor="ref-link" className="text-slate-700 font-semibold">Reference Link</Label>
-                        <Input
-                            id="ref-link"
-                            placeholder="https://..."
-                            value={referenceLink}
-                            onChange={(e) => setReferenceLink(e.target.value)}
-                            className="rounded-xl border-slate-200 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Dates */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 flex flex-col">
-                            <Label className="text-slate-700 font-semibold">Production Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("rounded-xl justify-start text-left font-normal border-slate-200", !productionDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {productionDate ? format(productionDate, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 bg-white rounded-xl" align="start">
-                                    <Calendar mode="single" selected={productionDate} onSelect={setProductionDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="space-y-2 flex flex-col">
-                            <Label className="text-slate-700 font-semibold">Upload Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant={"outline"} className={cn("rounded-xl justify-start text-left font-normal border-slate-200", !uploadDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {uploadDate ? format(uploadDate, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 bg-white rounded-xl" align="start">
-                                    <Calendar mode="single" selected={uploadDate} onSelect={setUploadDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                    </div>
-
-                    {/* Talent Checkboxes */}
-                    {talents.length > 0 && (
-                        <div className="space-y-2">
-                            <Label className="text-slate-700 font-semibold">Assign Talents</Label>
-                            <div className="grid grid-cols-2 gap-2 border border-slate-100 p-4 rounded-xl max-h-32 overflow-y-auto">
-                                {talents.map(talent => (
-                                    <div key={talent.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`talent-${talent.id}`}
-                                            checked={selectedTalentIds.includes(talent.id)}
-                                            onCheckedChange={() => toggleTalent(talent.id)}
-                                        />
-                                        <Label htmlFor={`talent-${talent.id}`} className="text-sm cursor-pointer">{talent.name}</Label>
-                                    </div>
-                                ))}
+                        {/* Platform + Status */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-slate-700 font-semibold">Platform</Label>
+                                <Select value={platform} onValueChange={setPlatform}>
+                                    <SelectTrigger className="rounded-xl border-slate-200">
+                                        <SelectValue placeholder="Select platform" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white rounded-xl">
+                                        <SelectItem value="TikTok">TikTok</SelectItem>
+                                        <SelectItem value="Instagram">Instagram</SelectItem>
+                                        <SelectItem value="YouTube">YouTube</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-slate-700 font-semibold">Status</Label>
+                                <Select value={status} onValueChange={setStatus}>
+                                    <SelectTrigger className="rounded-xl border-slate-200">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white rounded-xl">
+                                        <SelectItem value="Idea">Idea</SelectItem>
+                                        <SelectItem value="To-Do">To-Do</SelectItem>
+                                        <SelectItem value="Filming">Filming</SelectItem>
+                                        <SelectItem value="Editing">Editing</SelectItem>
+                                        <SelectItem value="Done">Done</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
-                    )}
 
-                    {/* Footer */}
-                    <DialogFooter className="gap-2">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl" disabled={isLoading}>
-                            Cancel
-                        </Button>
-                        {task && (
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 gap-2"
-                                onClick={() => {
-                                    exportContentToPDF({
-                                        ...task,
-                                        title, platform, status, description,
-                                        script,
-                                        reference_link: referenceLink,
-                                        production_date: productionDate ? productionDate.toISOString().split('T')[0] : task.production_date,
-                                        upload_date: uploadDate ? uploadDate.toISOString().split('T')[0] : task.upload_date,
-                                    })
-                                    toast.success('📄 PDF downloaded!')
-                                }}
-                            >
-                                <FileDown size={16} />
-                                Export PDF
-                            </Button>
+                        {/* Description */}
+                        <div className="space-y-2">
+                            <Label htmlFor="description" className="text-slate-700 font-semibold">Description</Label>
+                            <Textarea
+                                id="description"
+                                placeholder="Short description of this content idea..."
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="rounded-xl border-slate-200 min-h-[80px] focus:ring-blue-500"
+                            />
+                        </div>
+
+                        {/* Script / Notes */}
+                        <div className="space-y-2">
+                            <Label htmlFor="script" className="text-slate-700 font-semibold">Script / Notes</Label>
+                            <Textarea
+                                id="script"
+                                placeholder="Key hooks, visual ideas, talking points..."
+                                value={script}
+                                onChange={(e) => setScript(e.target.value)}
+                                className="rounded-xl border-slate-200 min-h-[80px] focus:ring-blue-500"
+                            />
+                        </div>
+
+                        {/* Reference Link */}
+                        <div className="space-y-2">
+                            <Label htmlFor="ref-link" className="text-slate-700 font-semibold">Reference Link</Label>
+                            <Input
+                                id="ref-link"
+                                placeholder="https://..."
+                                value={referenceLink}
+                                onChange={(e) => setReferenceLink(e.target.value)}
+                                className="rounded-xl border-slate-200 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        {/* Dates */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2 flex flex-col">
+                                <Label className="text-slate-700 font-semibold">Production Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("rounded-xl justify-start text-left font-normal border-slate-200", !productionDate && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {productionDate ? format(productionDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 bg-white rounded-xl" align="start">
+                                        <Calendar mode="single" selected={productionDate} onSelect={setProductionDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="space-y-2 flex flex-col">
+                                <Label className="text-slate-700 font-semibold">Upload Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant={"outline"} className={cn("rounded-xl justify-start text-left font-normal border-slate-200", !uploadDate && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {uploadDate ? format(uploadDate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 bg-white rounded-xl" align="start">
+                                        <Calendar mode="single" selected={uploadDate} onSelect={setUploadDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </div>
+
+                        {/* Talent Checkboxes */}
+                        {talents.length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-slate-700 font-semibold">Assign Talents</Label>
+                                <div className="grid grid-cols-2 gap-2 border border-slate-100 p-4 rounded-xl max-h-32 overflow-y-auto">
+                                    {talents.map(talent => (
+                                        <div key={talent.id} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`talent-${talent.id}`}
+                                                checked={selectedTalentIds.includes(talent.id)}
+                                                onCheckedChange={() => toggleTalent(talent.id)}
+                                            />
+                                            <Label htmlFor={`talent-${talent.id}`} className="text-sm cursor-pointer">{talent.name}</Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         )}
-                        <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8">
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {task ? 'Save Changes' : 'Create Idea'}
+                    </form>
+                </div>
+
+                {/* Sticky Footer — fixed at bottom with blur */}
+                <div className="sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-4 py-4 sm:px-8 sm:py-4 flex gap-2 justify-end"
+                    style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
+                >
+                    <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl" disabled={isLoading}>
+                        Cancel
+                    </Button>
+                    {task && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 gap-2"
+                            onClick={() => {
+                                exportContentToPDF({
+                                    ...task,
+                                    title, platform, status, description,
+                                    script,
+                                    reference_link: referenceLink,
+                                    production_date: productionDate ? productionDate.toISOString().split('T')[0] : task.production_date,
+                                    upload_date: uploadDate ? uploadDate.toISOString().split('T')[0] : task.upload_date,
+                                })
+                                toast.success('📄 PDF downloaded!')
+                            }}
+                        >
+                            <FileDown size={16} />
+                            Export PDF
                         </Button>
-                    </DialogFooter>
-                </form>
+                    )}
+                    <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8 flex-1 sm:flex-none"
+                        onClick={handleSubmit}
+                    >
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {task ? 'Save Changes' : 'Create Idea'}
+                    </Button>
+                </div>
             </DialogContent>
         </Dialog>
     )
