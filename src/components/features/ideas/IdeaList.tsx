@@ -55,7 +55,7 @@ export function IdeaList({ ideas }: { ideas: Content[] }) {
                     <Card
                         key={idea.id}
                         onClick={() => handleCardClick(idea)}
-                        className="cursor-pointer hover:border-primary/50 transition-colors overflow-hidden group"
+                        className="cursor-pointer hover:border-blue-200 bg-white border-slate-100 transition-all overflow-hidden group rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]"
                     >
                         {idea.thumbnail_url ? (
                             <div className="h-32 w-full overflow-hidden bg-muted">

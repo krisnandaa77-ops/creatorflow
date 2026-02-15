@@ -17,12 +17,13 @@ import {
 import { motion } from 'framer-motion'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Column } from './Column'
-import { KanbanCard } from './KanbanCard'
+import { KanbanCard } from '@/components/KanbanCard'
 import { DraggableTalent } from './DraggableTalent'
-import { EditContentModal } from './EditContentModal'
+import { ContentModal } from './ContentModal'
 import { updateContentStatus, assignTalentToContent } from '@/actions/content-actions'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Plus } from 'lucide-react'
 
 interface BoardProps {
     initialTasks: any[]
@@ -43,9 +44,9 @@ export function Board({ initialTasks, talents }: BoardProps) {
     const [activeType, setActiveType] = useState<'Task' | 'Talent' | null>(null)
     const [activeItem, setActiveItem] = useState<any>(null)
 
-    // Edit modal state
-    const [editingTask, setEditingTask] = useState<any | null>(null)
-    const [editModalOpen, setEditModalOpen] = useState(false)
+    // Modal State
+    const [modalOpen, setModalOpen] = useState(false)
+    const [selectedTask, setSelectedTask] = useState<any | null>(null)
 
     useEffect(() => {
         setTasks(initialTasks)
@@ -62,16 +63,22 @@ export function Board({ initialTasks, talents }: BoardProps) {
         })
     )
 
+    // Handlers
+    function handleCreateNew() {
+        setSelectedTask(null)
+        setModalOpen(true)
+    }
+
     function handleEditTask(task: any) {
-        setEditingTask(task)
-        setEditModalOpen(true)
+        setSelectedTask(task)
+        setModalOpen(true)
     }
 
     function handleSaveTask(updatedTask: any) {
-        // Optimistic update
-        setTasks(prev =>
-            prev.map(t => (t.id === updatedTask.id ? updatedTask : t))
-        )
+        // Optimistic update handled by Next.js revalidatePath usually, 
+        // but we can update local state for instant feedback if we wanted.
+        // For now, we rely on the server action's revalidate.
+        setModalOpen(false)
     }
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -88,7 +95,7 @@ export function Board({ initialTasks, talents }: BoardProps) {
     }
 
     const handleDragOver = (event: DragOverEvent) => {
-        // Only needed for sorting logic
+        // Optional sorting logic can go here
     }
 
     const handleDragEnd = async (event: DragEndEvent) => {
@@ -147,6 +154,7 @@ export function Board({ initialTasks, talents }: BoardProps) {
             }
 
             if (newStatus && newStatus !== active.data.current.task.status) {
+                // Optimistic Local Update
                 setTasks((prev) =>
                     prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t)
                 )
@@ -165,7 +173,26 @@ export function Board({ initialTasks, talents }: BoardProps) {
     }
 
     return (
-        <>
+        <div className="flex flex-col h-full">
+            {/* Header Integrated into Board Area */}
+            <header className="mb-8 flex justify-between items-center px-2">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        Welcome back, Krisnanda! ✨
+                    </h1>
+                    <p className="text-slate-500 mt-1 font-medium">
+                        Here's what's happening with your content today.
+                    </p>
+                </div>
+                <button
+                    onClick={handleCreateNew}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                >
+                    <Plus size={18} />
+                    <span>New Idea</span>
+                </button>
+            </header>
+
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -173,50 +200,23 @@ export function Board({ initialTasks, talents }: BoardProps) {
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ staggerChildren: 0.1 }}
-                    className="flex h-[calc(100vh-200px)] gap-6 overflow-x-auto pb-4 px-2"
-                >
+                <div className="flex h-[calc(100vh-200px)] gap-6 overflow-x-auto pb-4 px-2">
                     {/* Kanban Board Area */}
                     <div className="flex gap-6 flex-1 min-w-max">
                         {COLUMNS.map((col) => (
-                            <motion.div
+                            <Column
                                 key={col.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4, ease: "easeOut" }}
-                            >
-                                <Column
-                                    id={col.id}
-                                    title={col.title}
-                                    tasks={getTasksByStatus(col.id)}
-                                    talents={talents}
-                                    onEditTask={handleEditTask}
-                                />
-                            </motion.div>
+                                id={col.id}
+                                title={col.title}
+                                tasks={getTasksByStatus(col.id)}
+                                talents={talents}
+                                onEditTask={handleEditTask}
+                            />
                         ))}
                     </div>
 
-                    {/* Right Sidebar: Talents */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5, duration: 0.4 }}
-                        className="w-64 border-l pl-6 flex flex-col gap-4 bg-transparent"
-                    >
-                        <h3 className="font-semibold text-zinc-900">Talents</h3>
-                        <div className="flex flex-col gap-3">
-                            {talents.map(talent => (
-                                <DraggableTalent key={talent.id} talent={talent} />
-                            ))}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-                            Drag talents onto cards to assign them to specific tasks.
-                        </p>
-                    </motion.div>
-                </motion.div>
+
+                </div>
 
                 <DragOverlay dropAnimation={{
                     sideEffects: defaultDropAnimationSideEffects({
@@ -228,39 +228,31 @@ export function Board({ initialTasks, talents }: BoardProps) {
                     }),
                 }}>
                     {activeId && activeType === 'Task' ? (
-                        <motion.div
-                            initial={{ rotate: 0, scale: 1 }}
-                            animate={{ rotate: 3, scale: 1.05 }}
-                            className="w-[280px] cursor-grabbing"
-                            style={{ transformOrigin: "50% 50%" }}
-                        >
-                            <KanbanCard task={activeItem} talents={talents} overlay />
-                        </motion.div>
+                        <div className="w-[280px] cursor-grabbing rotate-3 scale-105">
+                            <KanbanCard task={activeItem} />
+                        </div>
                     ) : activeId && activeType === 'Talent' ? (
-                        <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-zinc-200 shadow-xl cursor-grabbing scale-105 rotate-3 w-max">
+                        <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-slate-200 shadow-xl cursor-grabbing scale-105 rotate-3 w-max">
                             <Avatar className="h-8 w-8 ring-2 ring-white">
                                 <AvatarImage src={activeItem.avatar_url} />
                                 <AvatarFallback>{activeItem.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-semibold text-zinc-900">{activeItem.name}</span>
+                            <span className="text-sm font-semibold text-slate-900">{activeItem.name}</span>
                         </div>
                     ) : null}
                 </DragOverlay>
             </DndContext>
 
-            {/* Edit Content Modal */}
-            {editingTask && (
-                <EditContentModal
-                    task={editingTask}
-                    talents={talents}
-                    open={editModalOpen}
-                    onOpenChange={(open) => {
-                        setEditModalOpen(open)
-                        if (!open) setEditingTask(null)
-                    }}
-                    onSave={handleSaveTask}
-                />
-            )}
-        </>
+            <ContentModal
+                task={selectedTask}
+                talents={talents}
+                open={modalOpen}
+                onOpenChange={(open) => {
+                    setModalOpen(open)
+                    if (!open) setSelectedTask(null)
+                }}
+                onSave={handleSaveTask}
+            />
+        </div>
     )
 }

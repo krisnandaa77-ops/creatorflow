@@ -23,6 +23,8 @@ export interface Database {
                     upload_date: string | null
                     script: string | null
                     due_date: string | null
+                    is_shot: boolean
+                    is_uploaded: boolean
                     created_at: string
                 }
                 Insert: {
@@ -37,6 +39,8 @@ export interface Database {
                     upload_date?: string | null
                     script?: string | null
                     due_date?: string | null
+                    is_shot?: boolean
+                    is_uploaded?: boolean
                     created_at?: string
                 }
                 Update: {
@@ -51,6 +55,8 @@ export interface Database {
                     upload_date?: string | null
                     script?: string | null
                     due_date?: string | null
+                    is_shot?: boolean
+                    is_uploaded?: boolean
                     created_at?: string
                 }
                 Relationships: []
