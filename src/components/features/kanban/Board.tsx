@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils'
 interface BoardProps {
     initialTasks: any[]
     talents: any[]
+    userProfile?: any
 }
 
 const COLUMNS = [
@@ -39,7 +40,7 @@ const COLUMNS = [
     { id: 'Done', title: 'Done' },
 ]
 
-export function Board({ initialTasks, talents }: BoardProps) {
+export function Board({ initialTasks, talents, userProfile }: BoardProps) {
     const [tasks, setTasks] = useState(initialTasks)
     const [activeId, setActiveId] = useState<string | null>(null)
     const [activeType, setActiveType] = useState<'Task' | 'Talent' | null>(null)
@@ -176,7 +177,7 @@ export function Board({ initialTasks, talents }: BoardProps) {
             <header className="mb-6 md:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
-                        Welcome back, Krisnanda! ✨
+                        Welcome back, {userProfile?.full_name || 'Creator'}! ✨
                     </h1>
                     <p className="text-slate-500 mt-1 font-medium text-sm md:text-base">
                         Here&apos;s what&apos;s happening with your content today.

@@ -17,12 +17,22 @@ import { revalidatePath } from 'next/cache'
 //   upload_date     text | null
 //   script          text | null
 //   due_date        text | null
+//   user_id         uuid (FK → auth.users.id)
 //   created_at      timestamptz
 // ============================================================
+
+/** Helper: get authenticated user or throw */
+async function getAuthUser(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+    return user
+}
 
 export async function getContents() {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
+
         const { data, error } = await supabase
             .from('contents')
             .select(`
@@ -31,6 +41,7 @@ export async function getContents() {
                     talent:talents (*)
                 )
             `)
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -38,7 +49,7 @@ export async function getContents() {
             return []
         }
 
-        console.log(`[getContents] Fetched ${data?.length ?? 0} items`)
+        console.log(`[getContents] Fetched ${data?.length ?? 0} items for user ${user.id}`)
         return data
     } catch (err: any) {
         console.error('[getContents] Unexpected error:', err)
@@ -49,6 +60,7 @@ export async function getContents() {
 export async function createContent(formData: FormData) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
 
         const title = formData.get('title') as string
         const platform = formData.get('platform') as string || 'TikTok'
@@ -69,6 +81,7 @@ export async function createContent(formData: FormData) {
             script,
             production_date,
             upload_date,
+            user_id: user.id,
         }
 
         console.log('[createContent] ===== DATA TO BE SAVED =====')
@@ -93,6 +106,7 @@ export async function createContent(formData: FormData) {
             const talentInserts = talentIds.map(tid => ({
                 content_id: content.id,
                 talent_id: tid,
+                user_id: user.id,
             }))
             console.log('[createContent] Assigning talents:', talentInserts)
 
@@ -118,6 +132,7 @@ export async function createContent(formData: FormData) {
 export async function updateContent(id: string, formData: FormData) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
 
         if (!id) {
             console.error('[updateContent] CRITICAL: ID is null/undefined!')
@@ -153,6 +168,7 @@ export async function updateContent(id: string, formData: FormData) {
             .from('contents')
             .update(updatePayload as any)
             .eq('id', id)
+            .eq('user_id', user.id)
             .select()
 
         if (error) {
@@ -176,6 +192,7 @@ export async function updateContent(id: string, formData: FormData) {
             const talentInserts = talentIds.map(tid => ({
                 content_id: id,
                 talent_id: tid,
+                user_id: user.id,
             }))
             const { error: talentError } = await supabase
                 .from('content_talents')
@@ -199,12 +216,14 @@ export async function updateContent(id: string, formData: FormData) {
 export async function updateContentStatus(id: string, status: string) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[updateContentStatus] ID:', id, 'Status:', status)
 
         const { error } = await supabase
             .from('contents')
             .update({ status } as any)
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[updateContentStatus] Supabase Error:', JSON.stringify(error, null, 2))
@@ -224,11 +243,12 @@ export async function updateContentStatus(id: string, status: string) {
 export async function assignTalentToContent(contentId: string, talentId: string) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[assignTalentToContent] Content:', contentId, 'Talent:', talentId)
 
         const { error } = await supabase
             .from('content_talents')
-            .insert({ content_id: contentId, talent_id: talentId })
+            .insert({ content_id: contentId, talent_id: talentId, user_id: user.id })
 
         if (error) {
             console.error('[assignTalentToContent] Supabase Error:', JSON.stringify(error, null, 2))
@@ -258,12 +278,14 @@ export async function advanceContentStatus(id: string, currentStatus: string) {
 export async function setProductionDate(id: string, date: string) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[setProductionDate] ID:', id, 'Date:', date)
 
         const { error } = await supabase
             .from('contents')
             .update({ production_date: date, status: 'To-Do' } as any)
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[setProductionDate] Supabase Error:', JSON.stringify(error, null, 2))
@@ -287,10 +309,13 @@ export async function setProductionDate(id: string, date: string) {
 export async function getIdeas() {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
+
         const { data, error } = await supabase
             .from('contents')
             .select('*')
             .eq('status', 'Idea')
+            .eq('user_id', user.id)
             .order('created_at', { ascending: false })
 
         if (error) {
@@ -298,7 +323,7 @@ export async function getIdeas() {
             return []
         }
 
-        console.log(`[getIdeas] Fetched ${data?.length ?? 0} ideas`)
+        console.log(`[getIdeas] Fetched ${data?.length ?? 0} ideas for user ${user.id}`)
         return data
     } catch (err: any) {
         console.error('[getIdeas] Unexpected error:', err)
@@ -309,6 +334,7 @@ export async function getIdeas() {
 export async function createIdea(formData: FormData) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
 
         const title = formData.get('title') as string
         const reference_link = formData.get('reference_link') as string || null
@@ -319,7 +345,8 @@ export async function createIdea(formData: FormData) {
             reference_link,
             description,
             status: 'Idea',
-            platform: 'TikTok', // default
+            platform: 'TikTok',
+            user_id: user.id,
         }
 
         console.log('[createIdea] ===== SAVING IDEA =====')
@@ -349,6 +376,7 @@ export async function createIdea(formData: FormData) {
 export async function updateIdea(id: string, formData: FormData) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
 
         if (!id) {
             return { error: 'Idea ID is missing.' }
@@ -371,6 +399,7 @@ export async function updateIdea(id: string, formData: FormData) {
             .from('contents')
             .update(payload as any)
             .eq('id', id)
+            .eq('user_id', user.id)
             .select()
 
         if (error) {

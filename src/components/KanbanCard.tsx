@@ -80,12 +80,12 @@ export function KanbanCard({ task, onClick }: KanbanCardProps) {
                     <div className="mt-0.5 p-1 bg-blue-50 rounded-lg shrink-0">
                         <Clapperboard className="text-blue-600" size={14} />
                     </div>
-                    <h3 className="font-bold text-slate-900 text-sm leading-snug pt-0.5">
+                    <h3 className="font-bold text-slate-900 text-sm leading-snug pt-0.5 whitespace-normal break-words">
                         {task.title}
                     </h3>
                 </div>
                 {task.description && (
-                    <p className="text-xs text-slate-500 font-medium line-clamp-2 pl-9">
+                    <p className="text-xs text-slate-500 font-medium line-clamp-2 pl-9 whitespace-normal break-words">
                         {task.description}
                     </p>
                 )}

@@ -15,6 +15,13 @@ function getTodayString(): string {
     return `${yyyy}-${mm}-${dd}`
 }
 
+/** Helper: get authenticated user or throw */
+async function getAuthUser(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+    return user
+}
+
 // ============================================================
 // getDailyFocusData() — All 3 columns in a single call
 // ROBUST: handles missing is_shot / is_uploaded columns gracefully
@@ -22,18 +29,19 @@ function getTodayString(): string {
 export async function getDailyFocusData() {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         const today = getTodayString()
 
         console.log('[getDailyFocusData] ===== FETCHING =====')
-        console.log('[getDailyFocusData] Today:', today)
+        console.log('[getDailyFocusData] Today:', today, 'User:', user.id)
 
         // 1. Shooting Today (production_date = today)
-        // Try fetching with is_shot first, fallback without it
         let shooting: any[] = []
         const { data: shootData, error: shootErr } = await supabase
             .from('contents')
             .select('id, title, platform, status, production_date, is_shot')
             .eq('production_date', today)
+            .eq('user_id', user.id)
             .order('created_at')
 
         if (shootErr) {
@@ -43,12 +51,13 @@ export async function getDailyFocusData() {
                 .from('contents')
                 .select('id, title, platform, status, production_date')
                 .eq('production_date', today)
+                .eq('user_id', user.id)
                 .order('created_at')
             shooting = (fallback || []).map(item => ({ ...item, is_shot: false }))
         } else {
             shooting = (shootData || []).map(item => ({
                 ...item,
-                is_shot: item.is_shot ?? false, // handle null
+                is_shot: item.is_shot ?? false,
             }))
         }
 
@@ -58,6 +67,7 @@ export async function getDailyFocusData() {
             .from('contents')
             .select('id, title, platform, status, upload_date, is_uploaded')
             .eq('upload_date', today)
+            .eq('user_id', user.id)
             .order('created_at')
 
         if (uploadErr) {
@@ -67,6 +77,7 @@ export async function getDailyFocusData() {
                 .from('contents')
                 .select('id, title, platform, status, upload_date')
                 .eq('upload_date', today)
+                .eq('user_id', user.id)
                 .order('created_at')
             uploads = (fallback || []).map(item => ({ ...item, is_uploaded: false }))
         } else {
@@ -81,6 +92,7 @@ export async function getDailyFocusData() {
             .from('daily_todos')
             .select('*')
             .eq('due_date', today)
+            .eq('user_id', user.id)
             .order('created_at')
 
         if (todoErr) console.error('[getDailyFocusData] Todos error:', todoErr.message)
@@ -104,10 +116,12 @@ export async function getDailyFocusData() {
 export async function getCalendarEvents() {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
 
         const { data, error } = await supabase
             .from('contents')
             .select('id, title, platform, status, production_date, upload_date')
+            .eq('user_id', user.id)
             .order('created_at')
 
         if (error) {
@@ -115,7 +129,7 @@ export async function getCalendarEvents() {
             return []
         }
 
-        console.log(`[getCalendarEvents] Fetched ${data?.length ?? 0} contents`)
+        console.log(`[getCalendarEvents] Fetched ${data?.length ?? 0} contents for user ${user.id}`)
         return data || []
     } catch (err: any) {
         console.error('[getCalendarEvents] Unexpected error:', err)
@@ -129,9 +143,10 @@ export async function getCalendarEvents() {
 export async function addGeneralTask(taskName: string) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         const today = getTodayString()
 
-        console.log('[addGeneralTask] Task:', taskName, 'Date:', today)
+        console.log('[addGeneralTask] Task:', taskName, 'Date:', today, 'User:', user.id)
 
         const { data, error } = await supabase
             .from('daily_todos')
@@ -139,6 +154,7 @@ export async function addGeneralTask(taskName: string) {
                 task_name: taskName,
                 due_date: today,
                 is_completed: false,
+                user_id: user.id,
             })
             .select()
             .single()
@@ -164,12 +180,14 @@ export async function addGeneralTask(taskName: string) {
 export async function toggleTaskStatus(id: string, isCompleted: boolean) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[toggleTaskStatus] ID:', id, 'isCompleted:', isCompleted)
 
         const { error } = await supabase
             .from('daily_todos')
             .update({ is_completed: isCompleted })
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[toggleTaskStatus] Supabase Error:', JSON.stringify(error, null, 2))
@@ -192,12 +210,14 @@ export async function toggleTaskStatus(id: string, isCompleted: boolean) {
 export async function deleteTask(id: string) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[deleteTask] ID:', id)
 
         const { error } = await supabase
             .from('daily_todos')
             .delete()
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[deleteTask] Supabase Error:', JSON.stringify(error, null, 2))
@@ -219,12 +239,14 @@ export async function deleteTask(id: string) {
 export async function toggleShotStatus(id: string, isShot: boolean) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[toggleShotStatus] ID:', id, 'is_shot:', isShot)
 
         const { error } = await supabase
             .from('contents')
             .update({ is_shot: isShot } as any)
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[toggleShotStatus] Supabase Error:', JSON.stringify(error, null, 2))
@@ -247,12 +269,14 @@ export async function toggleShotStatus(id: string, isShot: boolean) {
 export async function toggleUploadStatus(id: string, isUploaded: boolean) {
     try {
         const supabase = await createClient()
+        const user = await getAuthUser(supabase)
         console.log('[toggleUploadStatus] ID:', id, 'is_uploaded:', isUploaded)
 
         const { error } = await supabase
             .from('contents')
             .update({ is_uploaded: isUploaded } as any)
             .eq('id', id)
+            .eq('user_id', user.id)
 
         if (error) {
             console.error('[toggleUploadStatus] Supabase Error:', JSON.stringify(error, null, 2))

@@ -25,6 +25,7 @@ export interface Database {
                     due_date: string | null
                     is_shot: boolean
                     is_uploaded: boolean
+                    user_id: string
                     created_at: string
                 }
                 Insert: {
@@ -41,6 +42,7 @@ export interface Database {
                     due_date?: string | null
                     is_shot?: boolean
                     is_uploaded?: boolean
+                    user_id?: string
                     created_at?: string
                 }
                 Update: {
@@ -57,6 +59,7 @@ export interface Database {
                     due_date?: string | null
                     is_shot?: boolean
                     is_uploaded?: boolean
+                    user_id?: string
                     created_at?: string
                 }
                 Relationships: []
@@ -65,19 +68,31 @@ export interface Database {
                 Row: {
                     id: string
                     name: string
+                    role: string | null
+                    email: string | null
+                    telegram: string | null
                     avatar_url: string | null
+                    user_id: string
                     created_at: string
                 }
                 Insert: {
                     id?: string
                     name: string
+                    role?: string | null
+                    email?: string | null
+                    telegram?: string | null
                     avatar_url?: string | null
+                    user_id?: string
                     created_at?: string
                 }
                 Update: {
                     id?: string
                     name?: string
+                    role?: string | null
+                    email?: string | null
+                    telegram?: string | null
                     avatar_url?: string | null
+                    user_id?: string
                     created_at?: string
                 }
                 Relationships: []
@@ -86,14 +101,17 @@ export interface Database {
                 Row: {
                     content_id: string
                     talent_id: string
+                    user_id: string
                 }
                 Insert: {
                     content_id: string
                     talent_id: string
+                    user_id?: string
                 }
                 Update: {
                     content_id?: string
                     talent_id?: string
+                    user_id?: string
                 }
                 Relationships: [
                     {
@@ -116,6 +134,7 @@ export interface Database {
                     task_name: string
                     is_completed: boolean
                     due_date: string | null
+                    user_id: string
                     created_at: string
                 }
                 Insert: {
@@ -123,6 +142,7 @@ export interface Database {
                     task_name: string
                     is_completed?: boolean
                     due_date?: string | null
+                    user_id?: string
                     created_at?: string
                 }
                 Update: {
@@ -130,7 +150,84 @@ export interface Database {
                     task_name?: string
                     is_completed?: boolean
                     due_date?: string | null
+                    user_id?: string
                     created_at?: string
+                }
+                Relationships: []
+            }
+            payments: {
+                Row: {
+                    id: string
+                    user_id: string
+                    amount: number
+                    currency: string
+                    status: 'succeeded' | 'pending' | 'failed'
+                    payment_date: string
+                    plan_type: 'pro_monthly' | 'pro_yearly'
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    amount: number
+                    currency?: string
+                    status?: 'succeeded' | 'pending' | 'failed'
+                    payment_date?: string
+                    plan_type?: 'pro_monthly' | 'pro_yearly'
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    amount?: number
+                    currency?: string
+                    status?: 'succeeded' | 'pending' | 'failed'
+                    payment_date?: string
+                    plan_type?: 'pro_monthly' | 'pro_yearly'
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "payments_user_id_fkey"
+                        columns: ["user_id"]
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            profiles: {
+                Row: {
+                    id: string
+                    full_name: string | null
+                    avatar_url: string | null
+                    role: string
+                    subscription_tier: string
+                    bio: string | null
+                    company_name: string | null
+                    created_at: string
+                    last_seen: string | null
+                }
+                Insert: {
+                    id: string
+                    full_name?: string | null
+                    avatar_url?: string | null
+                    role?: string
+                    subscription_tier?: string
+                    bio?: string | null
+                    company_name?: string | null
+                    created_at?: string
+                    last_seen?: string | null
+                }
+                Update: {
+                    id?: string
+                    full_name?: string | null
+                    avatar_url?: string | null
+                    role?: string
+                    subscription_tier?: string
+                    bio?: string | null
+                    company_name?: string | null
+                    created_at?: string
+                    last_seen?: string | null
                 }
                 Relationships: []
             }

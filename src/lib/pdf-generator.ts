@@ -101,28 +101,39 @@ export async function exportContentToPDF(content: ContentData): Promise<void> {
         })
     })
 
-    // ---- 5. Capture with html2canvas ----
-    const captureEl = iframeDoc.getElementById('pdf-brief-root')
-    if (!captureEl) {
-        console.error('[exportContentToPDF] Cannot find #pdf-brief-root in iframe')
+    // ---- 5. Capture Header & Body separately ----
+    const headerEl = iframeDoc.getElementById('pdf-brief-header')
+    const bodyEl = iframeDoc.getElementById('pdf-brief-body')
+
+    if (!headerEl || !bodyEl) {
+        console.error('[exportContentToPDF] Cannot find #pdf-brief-header or #pdf-brief-body')
         root.unmount()
         document.body.removeChild(iframe)
         return
     }
 
-    let canvas: HTMLCanvasElement
+    let headerCanvas: HTMLCanvasElement
+    let bodyCanvas: HTMLCanvasElement
+
     try {
-        canvas = await html2canvas(captureEl, {
+        // Capture Header
+        headerCanvas = await html2canvas(headerEl, {
             scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
-            allowTaint: true,
             width: 794,
-            height: captureEl.scrollHeight,
-            // Force the canvas to use the iframe's window context
             windowWidth: 900,
-            windowHeight: 1200,
+        })
+        // Capture Body
+        bodyCanvas = await html2canvas(bodyEl, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: 794,
+            windowWidth: 900,
+            height: bodyEl.scrollHeight + 100, // Ensure no cutoff
         })
     } catch (err) {
         console.error('[exportContentToPDF] html2canvas error:', err)
@@ -131,29 +142,86 @@ export async function exportContentToPDF(content: ContentData): Promise<void> {
         return
     }
 
-    // ---- 6. Generate PDF ----
-    const imgData = canvas.toDataURL('image/png')
-    const pdfWidth = 210 // A4 mm
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-    const pageHeight = 297 // A4 mm
-
+    // ---- 6. Generate PDF with Repeating Header ----
     const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
     })
 
-    let remainingHeight = pdfHeight
-    let yOffset = 0
+    const pdfWidth = 210 // A4 mm
+    const pageHeight = 297 // A4 mm
 
-    pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight)
-    remainingHeight -= pageHeight
+    // Pixel to mm scale factor
+    // Canvas width is 794px * 2 (scale) = 1588px usually
+    // But html2canvas width option sets the viewport width. 
+    // We use the resulting canvas.width to determine scale.
+    const scaleFactor = pdfWidth / headerCanvas.width
 
-    while (remainingHeight > 0) {
-        yOffset -= pageHeight
-        pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight)
-        remainingHeight -= pageHeight
+    const headerHeightMm = headerCanvas.height * scaleFactor
+    const bodyHeightMm = bodyCanvas.height * scaleFactor
+
+    // Space available for body on each page
+    const availableHeightMm = pageHeight - headerHeightMm - 10 // 10mm margin bottom buffer
+
+    if (availableHeightMm <= 0) {
+        console.error('[exportContentToPDF] Header is too tall for page')
+        headerCanvas.width = 1 // dummy to avoid crash
+        // Fallback? or just continue
+    }
+
+    const headerImgData = headerCanvas.toDataURL('image/png')
+
+    let remainingBodyMm = bodyHeightMm
+    let currentBodyYMm = 0
+
+    // Helper to slice the body canvas
+    const getBodySliceUrl = (yMm: number, hMm: number): string => {
+        // Convert mm back to pixels
+        const yPx = yMm / scaleFactor
+        const hPx = hMm / scaleFactor
+
+        const sliceCanvas = document.createElement('canvas')
+        sliceCanvas.width = bodyCanvas.width
+        sliceCanvas.height = hPx
+
+        const ctx = sliceCanvas.getContext('2d')
+        if (!ctx) return ''
+
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height)
+
+        // Draw the specific slice
+        // sourceX, sourceY, sourceW, sourceH, destX, destY, destW, destH
+        ctx.drawImage(
+            bodyCanvas,
+            0, yPx, bodyCanvas.width, hPx,
+            0, 0, sliceCanvas.width, sliceCanvas.height
+        )
+
+        return sliceCanvas.toDataURL('image/png')
+    }
+
+    let pageIndex = 0
+
+    while (remainingBodyMm > 0) {
+        if (pageIndex > 0) pdf.addPage()
+
+        // 1. Draw Header
+        pdf.addImage(headerImgData, 'PNG', 0, 0, pdfWidth, headerHeightMm)
+
+        // 2. Determine slice height
+        const sliceHeightMm = Math.min(remainingBodyMm, availableHeightMm)
+
+        if (sliceHeightMm > 0) {
+            const sliceImgData = getBodySliceUrl(currentBodyYMm, sliceHeightMm)
+            // 3. Draw Body Slice
+            pdf.addImage(sliceImgData, 'PNG', 0, headerHeightMm, pdfWidth, sliceHeightMm)
+        }
+
+        remainingBodyMm -= sliceHeightMm
+        currentBodyYMm += sliceHeightMm
+        pageIndex++
     }
 
     // ---- 7. Save ----
@@ -166,6 +234,7 @@ export async function exportContentToPDF(content: ContentData): Promise<void> {
     // ---- 8. Cleanup ----
     root.unmount()
     document.body.removeChild(iframe)
+    // Canvas elements are GC'd
 
     console.log('[exportContentToPDF] SUCCESS:', `${safeName}_Brief.pdf`)
 }

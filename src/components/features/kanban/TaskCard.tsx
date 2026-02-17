@@ -49,6 +49,7 @@ export function TaskCard({ task, talents, onEdit }: TaskCardProps) {
             {...attributes}
             {...listeners}
             className={cn("touch-none", isDragging ? "opacity-30" : "")}
+            suppressHydrationWarning
         >
             <div ref={setDroppableRef} className={cn("rounded-[32px] transition-all", isOver && "ring-2 ring-blue-500 ring-offset-2")}>
                 <KanbanCard
