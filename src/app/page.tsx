@@ -39,10 +39,10 @@ export default function Home() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/login">
               <button className="text-sm font-semibold px-6 py-2 hover:bg-white/5 rounded-full transition-colors">Login</button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/register">
               <button className="bg-[#3f68e4] hover:bg-[#3f68e4]/90 text-white text-sm font-bold px-8 py-3 rounded-full shadow-[0_0_40px_-10px_rgba(63,104,228,0.5)] transition-all">
                 Get Started
               </button>
@@ -86,12 +86,12 @@ export default function Home() {
                 <Link href="#" className="text-base font-medium text-white/80 hover:text-[#3f68e4] py-2 transition-colors" onClick={() => setMenuOpen(false)}>Resources</Link>
                 <Link href="#pricing" className="text-base font-medium text-white/80 hover:text-[#3f68e4] py-2 transition-colors" onClick={() => setMenuOpen(false)}>Pricing</Link>
                 <div className="border-t border-white/10 pt-4 mt-2 flex flex-col gap-3">
-                  <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+                  <Link href="/login" onClick={() => setMenuOpen(false)}>
                     <button className="w-full text-center text-base font-semibold py-3 rounded-2xl border border-white/20 hover:bg-white/5 transition-colors">
                       Login
                     </button>
                   </Link>
-                  <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" onClick={() => setMenuOpen(false)}>
                     <button className="w-full text-center bg-[#3f68e4] hover:bg-[#3f68e4]/90 text-white text-base font-bold py-3 rounded-2xl shadow-[0_0_40px_-10px_rgba(63,104,228,0.5)] transition-all">
                       Coba Sekarang
                     </button>
@@ -141,7 +141,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2"
             >
-              <Link href="/dashboard" className="w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
                 <button className="w-full bg-[#3f68e4] hover:bg-[#3f68e4]/90 text-white text-base md:text-lg font-extrabold px-8 md:px-12 py-4 md:py-5 rounded-[32px] shadow-[0_0_40px_-10px_rgba(63,104,228,0.5)] transition-all transform hover:scale-105 active:scale-95">
                   Coba Sekarang
                 </button>
@@ -363,7 +363,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Link href="/dashboard">
+            <Link href="/register">
               <button className="w-full py-3.5 md:py-4 px-8 rounded-full border border-white/20 font-bold hover:bg-white/5 transition-all text-sm md:text-base">Start Trial</button>
             </Link>
           </motion.div>
@@ -398,7 +398,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Link href="/dashboard">
+            <Link href="/register">
               <button className="w-full py-4 md:py-5 px-8 rounded-full bg-[#3f68e4] text-white font-extrabold text-base md:text-lg shadow-xl hover:bg-[#3f68e4]/90 transition-all">Get Started Now</button>
             </Link>
           </motion.div>
@@ -429,7 +429,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Link href="/dashboard">
+            <Link href="/register">
               <button className="w-full py-3.5 md:py-4 px-8 rounded-full border border-white/20 font-bold hover:bg-white/5 transition-all text-sm md:text-base">Go Pro</button>
             </Link>
           </motion.div>
@@ -499,7 +499,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl lg:text-6xl font-extrabold text-white">Ready to flow?</h2>
             <p className="text-white/80 text-base md:text-xl">Join 10,000+ creators who upgraded their workflow to the future.</p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 md:gap-6 pt-4 md:pt-6">
-              <Link href="/dashboard" className="w-full sm:w-auto">
+              <Link href="/register" className="w-full sm:w-auto">
                 <button className="w-full h-full bg-white text-[#3f68e4] text-base md:text-lg font-extrabold px-8 md:px-12 py-4 md:py-5 rounded-full shadow-2xl hover:bg-slate-100 transition-all transform hover:scale-105 active:scale-95">
                   Coba Sekarang
                 </button>
@@ -530,6 +530,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </main>
+    </main >
   )
 }

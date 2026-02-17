@@ -23,14 +23,14 @@ export function Column({ id, title, tasks, talents, onEditTask }: ColumnProps) {
     })
 
     return (
-        <div className="flex flex-col min-w-[280px] h-full">
+        <div className="flex flex-col w-80 flex-shrink-0 h-full">
             {/* Column Header */}
             <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="font-bold text-slate-600 flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${id === 'Idea' ? 'bg-blue-500' :
-                            id === 'To-Do' ? 'bg-amber-500' :
-                                id === 'Filming' ? 'bg-purple-500' :
-                                    id === 'Editing' ? 'bg-pink-500' : 'bg-green-500'
+                        id === 'To-Do' ? 'bg-amber-500' :
+                            id === 'Filming' ? 'bg-purple-500' :
+                                id === 'Editing' ? 'bg-pink-500' : 'bg-green-500'
                         }`}></span>
                     {title}
                 </h3>

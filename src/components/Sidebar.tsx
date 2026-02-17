@@ -1,11 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Lightbulb, CheckSquare, Calendar, Users, Zap } from 'lucide-react'
+import { LayoutDashboard, Lightbulb, CheckSquare, Calendar, Users, Zap, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { UserSettingsModal } from './UserSettingsModal'
 
 const sidebarItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -17,6 +19,37 @@ const sidebarItems = [
 
 export function Sidebar() {
     const pathname = usePathname()
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const [userName, setUserName] = useState('User')
+    const [userPlan, setUserPlan] = useState('Free Plan')
+    const [userAvatar, setUserAvatar] = useState<string | null>(null)
+
+    // Fetch user profile data
+    useEffect(() => {
+        async function fetchUser() {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, avatar_url, subscription_tier')
+                .eq('id', user.id)
+                .single()
+
+            if (profile) {
+                setUserName(profile.full_name || user.email?.split('@')[0] || 'User')
+                setUserPlan(profile.subscription_tier === 'pro' ? 'Pro Plan' : 'Free Plan')
+                setUserAvatar(profile.avatar_url)
+
+                // Track last_seen
+                await supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', user.id)
+            }
+        }
+        fetchUser()
+    }, [settingsOpen]) // Re-fetch when modal closes (settingsOpen changes)
+
+    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
     return (
         <>
@@ -56,6 +89,16 @@ export function Sidebar() {
                             </Link>
                         )
                     })}
+                    {/* Settings icon in mobile nav */}
+                    <button
+                        onClick={() => setSettingsOpen(true)}
+                        className="relative flex flex-col items-center gap-0.5 px-1 py-1 min-w-0"
+                    >
+                        <div className="p-1.5 rounded-xl">
+                            <Settings className="w-5 h-5 text-white/50" />
+                        </div>
+                        <span className="text-[10px] font-medium text-white/50">Settings</span>
+                    </button>
                 </div>
             </nav>
 
@@ -109,17 +152,33 @@ export function Sidebar() {
                     })}
                 </nav>
 
-                {/* User Profile / Footer */}
+                {/* User Profile / Footer — Clickable to open Settings */}
                 <div className="mt-auto pt-6 border-t border-white/10">
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 border-2 border-white/20" />
-                        <div className="flex-1">
-                            <p className="text-sm font-medium text-white">Krisnanda</p>
-                            <p className="text-xs text-blue-200">Pro Plan</p>
+                    <button
+                        onClick={() => setSettingsOpen(true)}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-2xl hover:bg-white/10 transition-colors group"
+                    >
+                        <div className="h-10 w-10 rounded-full border-2 border-white/20 overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-400 flex-shrink-0">
+                            {userAvatar ? (
+                                <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-xs font-bold text-white">{initials}</span>
+                            )}
                         </div>
-                    </div>
+                        <div className="flex-1 text-left">
+                            <p className="text-sm font-medium text-white truncate">{userName}</p>
+                            <p className="text-xs text-blue-200">{userPlan}</p>
+                        </div>
+                        <Settings className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+                    </button>
                 </div>
             </aside>
+
+            {/* Settings Modal */}
+            <UserSettingsModal
+                isOpen={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+            />
         </>
     )
 }

@@ -5,6 +5,13 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { getOgImage } from '@/lib/metadata'
 
+/** Helper: get authenticated user or throw */
+async function getAuthUser(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+    return user
+}
+
 // Reuse existing creation but adds metadata fetching
 export async function createIdeaWithMetadata(formData: FormData) {
     const title = formData.get('title') as string
@@ -22,6 +29,8 @@ export async function createIdeaWithMetadata(formData: FormData) {
     }
 
     const supabase = await createClient()
+    const user = await getAuthUser(supabase)
+
     const { error } = await supabase
         .from('contents')
         .insert({
@@ -29,7 +38,8 @@ export async function createIdeaWithMetadata(formData: FormData) {
             platform,
             status: 'Idea',
             reference_link: referenceLink || null,
-            thumbnail_url: thumbnailUrl
+            thumbnail_url: thumbnailUrl,
+            user_id: user.id,
         })
 
     if (error) {
@@ -44,6 +54,7 @@ export async function createIdeaWithMetadata(formData: FormData) {
 
 export async function updateContentDates(id: string, productionDate: string | null, uploadDate: string | null) {
     const supabase = await createClient()
+    const user = await getAuthUser(supabase)
 
     const { error } = await supabase
         .from('contents')
@@ -52,6 +63,7 @@ export async function updateContentDates(id: string, productionDate: string | nu
             upload_date: uploadDate || null
         })
         .eq('id', id)
+        .eq('user_id', user.id)
 
     if (error) {
         return { error: error.message }
@@ -73,6 +85,7 @@ export async function updateContentFull(
     }
 ) {
     const supabase = await createClient()
+    const user = await getAuthUser(supabase)
 
     // 1. Update the content row
     const { error: updateError } = await supabase
@@ -85,6 +98,7 @@ export async function updateContentFull(
             script: data.script || null,
         })
         .eq('id', id)
+        .eq('user_id', user.id)
 
     if (updateError) {
         console.error('Error updating content:', updateError)
@@ -106,6 +120,7 @@ export async function updateContentFull(
         const rows = data.talent_ids.map(talentId => ({
             content_id: id,
             talent_id: talentId,
+            user_id: user.id,
         }))
 
         const { error: insertError } = await supabase
