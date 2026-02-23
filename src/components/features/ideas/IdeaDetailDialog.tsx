@@ -18,7 +18,7 @@ interface Idea {
     id: string
     title: string
     description?: string | null
-    platform: 'Instagram' | 'TikTok' | 'YouTube'
+    platform: string | null
     status: string
     thumbnail_url?: string | null
     reference_link?: string | null
@@ -32,7 +32,7 @@ interface IdeaDetailDialogProps {
     onOpenChange: (open: boolean) => void
 }
 
-const PlatformIcon = ({ platform }: { platform: string }) => {
+const PlatformIcon = ({ platform }: { platform: string | null }) => {
     switch (platform) {
         case 'Instagram':
             return <Instagram className="h-4 w-4 text-pink-500" />
