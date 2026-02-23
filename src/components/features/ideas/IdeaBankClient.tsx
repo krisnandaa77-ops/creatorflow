@@ -18,9 +18,9 @@ interface Idea {
     title: string
     description?: string | null
     reference_link?: string | null
-    platform?: string
-    status?: string
-    created_at?: string
+    platform?: string | null
+    status?: string | null
+    created_at?: string | null
 }
 
 interface IdeaBankClientProps {

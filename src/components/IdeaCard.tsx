@@ -11,8 +11,8 @@ interface IdeaCardProps {
         title: string
         description?: string | null
         reference_link?: string | null
-        platform?: string
-        created_at?: string
+        platform?: string | null
+        created_at?: string | null
     }
     onClick?: () => void
     index?: number

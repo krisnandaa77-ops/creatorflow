@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 interface ContentEvent {
     id: string
     title: string
-    platform?: string
-    status?: string
+    platform?: string | null
+    status?: string | null
     production_date?: string | null
     upload_date?: string | null
 }
@@ -37,7 +37,7 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                     id: `shoot-${content.id}`,
                     title: content.title,
                     type: 'shooting',
-                    platform: content.platform,
+                    platform: content.platform ?? undefined,
                 })
             }
             if (content.upload_date) {
@@ -47,7 +47,7 @@ export function CalendarClient({ contents }: CalendarClientProps) {
                     id: `upload-${content.id}`,
                     title: content.title,
                     type: 'upload',
-                    platform: content.platform,
+                    platform: content.platform ?? undefined,
                 })
             }
         })

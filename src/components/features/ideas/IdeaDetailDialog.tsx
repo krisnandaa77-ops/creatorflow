@@ -19,7 +19,7 @@ interface Idea {
     title: string
     description?: string | null
     platform: string | null
-    status: string
+    status: string | null
     thumbnail_url?: string | null
     reference_link?: string | null
     production_date?: string | null

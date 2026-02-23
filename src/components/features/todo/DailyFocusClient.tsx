@@ -21,7 +21,7 @@ interface ContentItem {
 interface TodoItemData {
     id: string
     task_name: string
-    is_completed: boolean
+    is_completed: boolean | null
     due_date?: string | null
     created_at?: string
 }
@@ -300,7 +300,7 @@ export function DailyFocusClient({ initialShooting, initialUploads, initialTodos
                                     key={todo.id}
                                     id={todo.id}
                                     title={todo.task_name}
-                                    done={todo.is_completed}
+                                    done={todo.is_completed ?? false}
                                     type="general"
                                     onToggle={handleToggleGeneral}
                                     onDelete={handleDelete}
