@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { X, Camera, LogOut, Loader2, User, Building2, FileText, Save } from 'lucide-react'
+import { X, Camera, LogOut, Loader2, User, Building2, FileText, Save, MessageCircle, Info } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface UserSettingsModalProps {
@@ -28,6 +28,9 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [userId, setUserId] = useState<string | null>(null)
+    const [telegramId, setTelegramId] = useState<number | null>(null)
+    const [linkingToken, setLinkingToken] = useState<string | null>(null)
+    const [showTelegramHelp, setShowTelegramHelp] = useState(false)
 
     // Fetch profile data when modal opens
     useEffect(() => {
@@ -42,7 +45,7 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
 
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('full_name, avatar_url, bio, company_name')
+                .select('full_name, avatar_url, bio, company_name, telegram_id, linking_token')
                 .eq('id', user.id)
                 .single()
 
@@ -52,6 +55,8 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
                 setCompanyName(profile.company_name || '')
                 setAvatarUrl(profile.avatar_url)
                 setPreviewUrl(profile.avatar_url)
+                setTelegramId(profile.telegram_id)
+                setLinkingToken(profile.linking_token)
             }
             setLoading(false)
         }
@@ -93,6 +98,44 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
             setPreviewUrl(avatarUrl) // Revert preview
         } finally {
             setUploading(false)
+        }
+    }
+
+    // Handle Telegram Connection
+    async function handleConnectTelegram() {
+        if (!userId) return
+
+        const token = 'CF-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({ linking_token: token })
+            .eq('id', userId)
+
+        if (error) {
+            toast.error('Failed to generate token')
+        } else {
+            setLinkingToken(token)
+            toast.success('Linking token generated!')
+        }
+    }
+
+    async function handleDisconnectTelegram() {
+        if (!userId) return
+
+        if (!confirm('Are you sure you want to disconnect your Telegram account?')) return
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({ telegram_id: null, linking_token: null })
+            .eq('id', userId)
+
+        if (error) {
+            toast.error('Failed to disconnect')
+        } else {
+            setTelegramId(null)
+            setLinkingToken(null)
+            toast.success('Disconnected from Telegram')
         }
     }
 
@@ -310,6 +353,106 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Telegram Integration */}
+                                    <div className="pt-6 border-t border-white/5">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center space-x-2">
+                                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                                    <MessageCircle className="w-4 h-4 text-sky-500" />
+                                                    Telegram Integration
+                                                </h3>
+                                                <button
+                                                    onClick={() => setShowTelegramHelp(!showTelegramHelp)}
+                                                    className="text-slate-400 hover:text-sky-400 transition-colors"
+                                                    title="How does this work?"
+                                                >
+                                                    <Info className="w-4 h-4" />
+                                                </button>
+                                            </div>
+
+                                            {/* Collapsible Help Guide */}
+                                            <AnimatePresence>
+                                                {showTelegramHelp && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="bg-[#1a1f2e] border border-white/5 rounded-xl p-4 text-xs text-slate-300 space-y-2 mb-2">
+                                                            {telegramId ? (
+                                                                <p>
+                                                                    ✅ <strong>Akunmu sudah terhubung.</strong><br />
+                                                                    Kamu sekarang bisa menambah Ide dan To-Do langsung dari Telegram.
+                                                                </p>
+                                                            ) : (
+                                                                <ol className="list-decimal list-inside space-y-1 ml-1 text-slate-400">
+                                                                    <li>Cari bot <strong className="text-white">@CreatorFlow_bot</strong> di Telegram.</li>
+                                                                    <li>Klik tombol <strong>"Connect Telegram"</strong> di bawah untuk dapat token.</li>
+                                                                    <li>Salin kode token (contoh: <code className="bg-black/30 px-1 rounded text-sky-400">CF-12345</code>).</li>
+                                                                    <li>Buka Telegram, kirim: <code className="bg-black/30 px-1 rounded text-sky-400">/start [TOKEN]</code>.</li>
+                                                                    <li>Tunggu balasan konfirmasi "Account linked successfully!".</li>
+                                                                </ol>
+                                                            )}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+
+                                            <div className="bg-[#1a1f2e] border border-white/5 rounded-xl p-4 w-full">
+                                                {telegramId ? (
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 border border-sky-500/30">
+                                                                <MessageCircle className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-sm font-bold text-white">Connected</div>
+                                                                <div className="text-xs text-slate-400 font-mono">ID: {telegramId}</div>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={handleDisconnectTelegram}
+                                                            className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs font-semibold text-red-400 hover:bg-red-500/20 transition-all"
+                                                        >
+                                                            Disconnect
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        <p className="text-xs text-slate-400 leading-relaxed">
+                                                            Connect your Telegram account to add ideas and todos directly from chat.
+                                                        </p>
+
+                                                        {linkingToken ? (
+                                                            <div className="space-y-3">
+                                                                <div className="p-4 bg-black/40 rounded-lg border border-white/5 text-center">
+                                                                    <div className="text-xs text-slate-500 mb-2">Open Telegram and type:</div>
+                                                                    <div className="text-xl font-mono font-bold text-sky-400 select-all tracking-wider">
+                                                                        /start {linkingToken}
+                                                                    </div>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => setLinkingToken(null)}
+                                                                    className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={handleConnectTelegram}
+                                                                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-600/20 border border-blue-500/50"
+                                                            >
+                                                                Connect Telegram
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Footer Actions */}
@@ -350,7 +493,8 @@ export function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
                         )}
                     </motion.div>
                 </div>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     )
 }

@@ -3,7 +3,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { TaskCard } from './TaskCard'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ColumnProps {
     id: string
@@ -23,9 +22,9 @@ export function Column({ id, title, tasks, talents, onEditTask }: ColumnProps) {
     })
 
     return (
-        <div className="flex flex-col w-80 flex-shrink-0 h-full">
-            {/* Column Header */}
-            <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex flex-col flex-1 min-w-0 max-h-[calc(100vh-220px)]">
+            {/* Sticky Column Header */}
+            <div className="flex items-center justify-between mb-4 px-1 sticky top-0 z-10 bg-inherit">
                 <h3 className="font-bold text-slate-600 flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${id === 'Idea' ? 'bg-blue-500' :
                         id === 'To-Do' ? 'bg-amber-500' :
@@ -39,22 +38,23 @@ export function Column({ id, title, tasks, talents, onEditTask }: ColumnProps) {
                 </span>
             </div>
 
-            {/* Drop Zone */}
-            <div ref={setNodeRef} className="flex-1 bg-slate-100/50 rounded-[32px] border border-dashed border-slate-200 p-2 overflow-hidden flex flex-col">
-                <ScrollArea className="flex-1 -mr-3 pr-3">
-                    <div className="flex flex-col gap-3 pb-4 min-h-[50px]">
-                        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                            {tasks.map((task) => (
-                                <TaskCard
-                                    key={task.id}
-                                    task={task}
-                                    talents={talents}
-                                    onEdit={onEditTask}
-                                />
-                            ))}
-                        </SortableContext>
-                    </div>
-                </ScrollArea>
+            {/* Drop Zone — scrollable with hidden scrollbar */}
+            <div
+                ref={setNodeRef}
+                className="flex-1 bg-slate-100/50 rounded-[32px] border border-dashed border-slate-200 p-2 overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col min-w-0"
+            >
+                <div className="flex flex-col gap-3 pb-4 min-h-[50px] min-w-0 w-full">
+                    <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                        {tasks.map((task) => (
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                talents={talents}
+                                onEdit={onEditTask}
+                            />
+                        ))}
+                    </SortableContext>
+                </div>
 
                 {tasks.length === 0 && (
                     <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2 opacity-60 min-h-[150px]">

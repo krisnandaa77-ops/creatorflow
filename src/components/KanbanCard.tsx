@@ -37,7 +37,7 @@ export function KanbanCard({ task, onClick }: KanbanCardProps) {
             onClick={onClick}
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300 }}
-            className="group relative bg-white rounded-2xl md:rounded-[32px] p-4 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 cursor-grab active:cursor-grabbing transition-all duration-300 w-full max-w-full box-border"
+            className="group relative bg-white rounded-2xl md:rounded-[32px] p-4 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] border border-slate-100 cursor-grab active:cursor-grabbing transition-all duration-300 w-full max-w-full min-w-0 overflow-hidden box-border"
         >
             {/* Header: Platform & Options */}
             <div className="flex justify-between items-start mb-4">

@@ -254,7 +254,7 @@ export function Board({ initialTasks, talents, userProfile }: BoardProps) {
             </div>
 
             {/* ===== DESKTOP DND COLUMNS (md+) ===== */}
-            <div className="hidden md:block">
+            <div className="hidden md:block overflow-hidden">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCorners}
@@ -262,19 +262,17 @@ export function Board({ initialTasks, talents, userProfile }: BoardProps) {
                     onDragOver={handleDragOver}
                     onDragEnd={handleDragEnd}
                 >
-                    <div className="flex h-[calc(100vh-200px)] gap-6 overflow-x-auto pb-4 px-2">
-                        <div className="flex gap-6 flex-1 min-w-max">
-                            {COLUMNS.map((col) => (
-                                <Column
-                                    key={col.id}
-                                    id={col.id}
-                                    title={col.title}
-                                    tasks={getTasksByStatus(col.id)}
-                                    talents={talents}
-                                    onEditTask={handleEditTask}
-                                />
-                            ))}
-                        </div>
+                    <div className="flex h-[calc(100vh-220px)] gap-4 lg:gap-5 overflow-hidden pb-4 px-2 w-full">
+                        {COLUMNS.map((col) => (
+                            <Column
+                                key={col.id}
+                                id={col.id}
+                                title={col.title}
+                                tasks={getTasksByStatus(col.id)}
+                                talents={talents}
+                                onEditTask={handleEditTask}
+                            />
+                        ))}
                     </div>
 
                     <DragOverlay dropAnimation={{
